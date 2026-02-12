@@ -1,0 +1,905 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Happy Valentine's Day, Kiaa!</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+    <!-- Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;1,400&family=DM+Sans:wght@300;400;500&family=Dancing+Script:wght@400;600&family=Caveat:wght@400;600&family=Cinzel:wght@400;600&display=swap" rel="stylesheet">
+    
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        'paper': '#FFF5F7',
+                        'burgundy': '#5D1822',
+                        'deep-red': '#8B1C26',
+                        'dusty-pink': '#EBCBCB',
+                        'rose-gold': '#C5908E',
+                        'soft-gold': '#D4AF37',
+                        'card-bg': '#FFFAF5',
+                        'champagne': '#E7D8C9'
+                    },
+                    fontFamily: {
+                        serif: ['"Playfair Display"', 'serif'],
+                        sans: ['"DM Sans"', 'sans-serif'],
+                        script: ['"Dancing Script"', 'cursive'],
+                        hand: ['"Caveat"', 'cursive'],
+                        classic: ['"Cinzel"', 'serif'],
+                    },
+                    animation: {
+                        'fade-in': 'fadeIn 1.2s ease-out forwards',
+                        'float': 'float 6s ease-in-out infinite',
+                        'slide-up': 'slideUp 0.8s ease-out forwards',
+                        'pulse-slow': 'pulse 3s infinite',
+                        'shimmer': 'shimmer 2.5s infinite linear',
+                        'flash': 'flash 0.5s',
+                    },
+                    keyframes: {
+                        fadeIn: {
+                            '0%': { opacity: '0' },
+                            '100%': { opacity: '1' },
+                        },
+                        slideUp: {
+                            '0%': { opacity: '0', transform: 'translateY(40px)' },
+                            '100%': { opacity: '1', transform: 'translateY(0)' },
+                        },
+                        float: {
+                            '0%, 100%': { transform: 'translateY(0)' },
+                            '50%': { transform: 'translateY(-10px)' },
+                        },
+                        shimmer: {
+                            '0%': { backgroundPosition: '-1000px 0' },
+                            '100%': { backgroundPosition: '1000px 0' },
+                        },
+                        flash: {
+                            '0%': { opacity: '0' },
+                            '50%': { opacity: '1', backgroundColor: 'white' },
+                            '100%': { opacity: '0' },
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        /* Grain Overlay */
+        .bg-grain {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 40;
+            opacity: 0.04;
+            background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 400 400' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E");
+        }
+
+        /* Falling Petals */
+        .petal {
+            position: fixed;
+            background-color: #ffc0cb;
+            border-radius: 150% 0 150% 0;
+            animation: fall linear infinite;
+            z-index: 1;
+            opacity: 0.4;
+            pointer-events: none;
+        }
+        @keyframes fall {
+            0% { transform: translate(0, -10vh) rotate(0deg); }
+            100% { transform: translate(-10vw, 110vh) rotate(360deg); }
+        }
+
+        body {
+            background-color: #FFF5F7;
+            color: #5D1822;
+            overflow-x: hidden;
+        }
+
+        .section {
+            display: none;
+            opacity: 0;
+            transition: opacity 0.8s ease-in-out;
+        }
+        
+        .section.active {
+            display: flex;
+            opacity: 1;
+        }
+
+        /* Washi Tape */
+        .washi-tape {
+            position: absolute;
+            top: -10px;
+            left: 50%;
+            transform: translateX(-50%) rotate(-2deg);
+            width: 80px;
+            height: 25px;
+            background: rgba(231, 216, 201, 0.8);
+            backdrop-filter: blur(2px);
+            border-left: 2px dashed rgba(0,0,0,0.1);
+            border-right: 2px dashed rgba(0,0,0,0.1);
+            z-index: 10;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        /* Polaroid Frame */
+        .polaroid-frame {
+            background: white;
+            padding: 12px 12px 35px 12px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.08);
+            transition: all 0.5s cubic-bezier(0.25, 0.8, 0.25, 1);
+            cursor: pointer;
+            position: relative;
+        }
+
+        .polaroid-frame:hover {
+            transform: scale(1.02) rotate(0deg) !important;
+            z-index: 20;
+            box-shadow: 0 15px 30px rgba(0,0,0,0.15);
+        }
+
+        /* Letter Paper */
+        .letter-paper {
+            background-image: linear-gradient(#e5e5e5 1.1px, transparent 1.1px);
+            background-size: 100% 2.2rem;
+            line-height: 2.2rem;
+            padding-top: 0.2rem;
+        }
+
+        /* Button Style */
+        .btn-aesthetic {
+            background-color: #5D1822;
+            color: #fff;
+            padding: 10px 24px;
+            border-radius: 50px;
+            font-family: 'DM Sans', sans-serif;
+            font-weight: 500;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+            font-size: 0.7rem;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 14px rgba(93, 24, 34, 0.2);
+            border: 1px solid transparent;
+        }
+        .btn-aesthetic:hover {
+            background-color: transparent;
+            color: #5D1822;
+            border-color: #5D1822;
+            transform: translateY(-2px);
+        }
+
+        /* Hide scrollbar */
+        .hide-scroll::-webkit-scrollbar { display: none; }
+        .hide-scroll { -ms-overflow-style: none; scrollbar-width: none; }
+
+        /* NEW CARD STYLES (No more Ticket Cutoffs) */
+        .royal-card {
+            background: #fffbf0;
+            border: 1px solid #e5e5e5;
+            border-radius: 12px;
+            box-shadow: 0 10px 30px -10px rgba(0,0,0,0.1);
+            position: relative;
+            overflow: hidden;
+        }
+        .royal-card::after {
+            content: '';
+            position: absolute;
+            inset: 6px;
+            border: 1px solid #C5908E;
+            border-radius: 8px;
+            pointer-events: none;
+        }
+
+        /* Camera Flash */
+        .flash-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: white;
+            opacity: 0;
+            pointer-events: none;
+            z-index: 100;
+        }
+        .animate-flash {
+            animation: flash 0.3s ease-out;
+        }
+        
+        /* Star Rating Interactive */
+        .star-rating {
+            display: inline-flex;
+            gap: 4px;
+            cursor: pointer;
+        }
+        .star-rating span {
+            font-size: 2rem;
+            color: #ccc;
+            transition: color 0.2s;
+        }
+        .star-rating span.active {
+            color: #FFD700;
+        }
+
+    </style>
+</head>
+<body class="min-h-screen font-serif selection:bg-rose-gold selection:text-white">
+
+    <div class="bg-grain"></div>
+    <div id="petals-container"></div>
+    <div id="camera-flash" class="flash-overlay"></div>
+    
+    <div class="fixed inset-2 md:inset-6 border border-rose-gold/30 pointer-events-none z-50 rounded-sm"></div>
+
+    <main class="w-full max-w-lg mx-auto z-10 min-h-screen flex flex-col relative">
+
+        <!-- SECTION 1: INTRO -->
+        <section id="intro" class="section active flex-col items-center justify-center text-center h-screen p-6 animate-fade-in relative overflow-hidden">
+            <div class="space-y-4 relative z-10">
+                <div class="w-px h-16 bg-burgundy/20 mx-auto mb-4"></div>
+                <p class="font-sans text-[10px] tracking-[0.4em] uppercase text-rose-gold animate-slide-up">Happy Valentine's Day, Kiaa!</p>
+                <h1 class="text-6xl md:text-8xl font-script text-burgundy drop-shadow-sm leading-tight">For My Love</h1>
+                <p class="font-serif italic text-lg text-dusty-pink">Chapter 1 - Infinity</p>
+                <div class="pt-6">
+                    <button onclick="nextSection('first-sight')" class="btn-aesthetic">
+                        Start Journey
+                    </button>
+                </div>
+            </div>
+            <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 text-[8rem] md:text-[15rem] font-classic text-burgundy/5 pointer-events-none whitespace-nowrap z-0">LOVE</div>
+        </section>
+
+        <!-- SECTION 2: FIRST SIGHT (FIXED LAYOUT) -->
+        <section id="first-sight" class="section flex-col items-center justify-start min-h-screen pt-24 pb-20 px-6 text-center relative overflow-y-auto hide-scroll">
+             <div class="max-w-xs mx-auto space-y-6 animate-slide-up">
+                <div class="relative w-44 h-56 mx-auto rotate-2 bg-white p-2 shadow-xl rounded-sm">
+                    <div class="washi-tape" style="top: -10px; left: 50%; transform: translateX(-50%) rotate(-3deg);"></div>
+                    <!-- Placeholder Image -->
+                    <img src="img/first.jpg" alt="First Sight" class="w-full h-full object-cover filter sepia-[0.2]">
+                </div>
+
+                <div class="space-y-3">
+                    <h2 class="font-serif text-3xl text-burgundy">The Beginning</h2>
+                    <p class="font-hand text-xl text-burgundy/80 leading-relaxed">
+                        "Aku Masih inget banget waktu pertama kali kita ketemu pas jadi kita panitia gsb."
+                    </p>
+                    <p class="font-sans text-xs text-gray-500 leading-relaxed px-4">
+                        Jujur, waktu itu aku belum tau nama kamu siapa, but hati aku langsung bilang "ini siapa si udh cantik pinter kuat lagi". Ternyata jatuh cinta pandangan pertama itu beneran ada ya. Dan yap ternyata kita udh se dekat itu yh sekarang
+                    </p>
+                </div>
+
+                <div class="pt-6 pb-12">
+                    <button onclick="nextSection('gallery')" class="btn-aesthetic">
+                        See Our Memories
+                    </button>
+                </div>
+             </div>
+        </section>
+
+        <!-- SECTION 3: GALLERY -->
+        <section id="gallery" class="section w-full h-screen flex-col pt-8 pb-20 px-4 overflow-y-auto hide-scroll">
+            <div class="text-center mb-8 sticky top-0 z-20 bg-white/85 backdrop-blur-md py-3 rounded-b-2xl w-full max-w-xs mx-auto border-b border-rose-gold/20 shadow-sm">
+                <h2 class="text-2xl font-serif text-burgundy">Our Memories</h2>
+                <p class="font-sans text-[9px] text-burgundy/60 tracking-widest uppercase mt-1">Tap Foto To Expand</p>
+            </div>
+
+            <div id="scrapbook-container" class="grid grid-cols-2 gap-3 md:gap-6 pb-24 px-1 w-full">
+                <!-- Javascript will fill this -->
+            </div>
+
+            <div class="fixed bottom-6 left-0 w-full flex justify-center z-30 pointer-events-none">
+                <button onclick="nextSection('letter')" class="pointer-events-auto btn-aesthetic flex items-center gap-2">
+                    READ LETTER <span>💌</span>
+                </button>
+            </div>
+        </section>
+
+        <!-- SECTION 4: LETTER -->
+        <section id="letter" class="section flex-col items-center justify-center p-4 min-h-screen">
+            <div class="w-full max-w-md bg-white shadow-2xl p-6 md:p-10 relative border border-champagne/50 overflow-hidden transform rotate-1">
+                <p class="font-script text-3xl text-burgundy mb-2 text-center">Dearest</p>
+                
+                <div id="typewriter" class="font-hand text-xl md:text-2xl text-burgundy leading-relaxed letter-paper min-h-[250px] -tracking-tight">
+                    <!-- Javascript will fill this -->
+                </div>
+
+                <div class="mt-6 text-right opacity-0 animate-fade-in" style="animation-delay: 3s; animation-fill-mode: forwards;">
+                    <p class="font-hand text-xl text-burgundy">With all my love,</p>
+                    <p class="font-serif text-[10px] text-gray-500 mt-1 uppercase tracking-widest">Juniorrr <span class="text-burgundy text-lg">❦</span></p>
+                </div>
+
+                <div class="mt-6 border-t border-gray-100 pt-3">
+                    <iframe style="border-radius:12px" src="https://open.spotify.com/embed/track/1Q7EgiMOuwDcB0PJC6AzON?utm_source=generator&theme=0" width="100%" height="80" frameBorder="0" allowfullscreen="" allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture" loading="lazy"></iframe>
+                </div>
+            </div>
+
+            <button onclick="nextSection('reasons')" class="mt-8 btn-aesthetic bg-white text-burgundy border border-burgundy/10 hover:bg-burgundy hover:text-white">
+                Continue Reading
+            </button>
+        </section>
+
+        <!-- SECTION 5: REASONS WHY I LOVE YOU -->
+        <section id="reasons" class="section flex-col items-center justify-start min-h-screen px-4 py-16 relative bg-paper overflow-y-auto hide-scroll">
+            <div class="w-full max-w-sm text-center space-y-8 pb-20">
+                <div class="mb-4">
+                    <h2 class="text-3xl font-serif text-burgundy italic">Reasons Why</h2>
+                    <p class="text-[10px] tracking-widest uppercase text-rose-gold">I Love You</p>
+                </div>
+
+                <!-- Vertical List Container -->
+                <div class="flex flex-col gap-6">
+                    <div class="bg-white p-6 shadow-md border-l-4 border-burgundy text-left rounded-r-lg transform transition-transform hover:-translate-y-1">
+                        <div class="flex items-center gap-3 mb-2">
+                            <h3 class="font-script text-xl text-burgundy">Karena cara kamu peduli sama hal hal kecil yg bikin aku ngerasa dihargaii.</h3>
+                        </div>
+                    </div>
+
+                    <div class="bg-white p-6 shadow-md border-l-4 border-burgundy text-left rounded-r-lg transform transition-transform hover:-translate-y-1">
+                        <div class="flex items-center gap-3 mb-2">
+                            <h3 class="font-script text-xl text-burgundy">Karena kamu selalu support aku dalam segala hal.</h3>
+                        </div>
+                    </div>
+                    <div class="bg-white p-6 shadow-md border-l-4 border-burgundy text-left rounded-r-lg transform transition-transform hover:-translate-y-1">
+                        <div class="flex items-center gap-3 mb-2">
+                            <h3 class="font-script text-xl text-burgundy">Canda tawa kamu yang bikin aku selalu happyy</h3>
+                        </div>
+                    </div>
+                    <div class="bg-white p-6 shadow-md border-l-4 border-burgundy text-left rounded-r-lg transform transition-transform hover:-translate-y-1">
+                        <div class="flex items-center gap-3 mb-2">
+                            <h3 class="font-script text-xl text-burgundy">Kamu selalu ada di saat aku butuh kamu.</h3>
+                        </div>
+                    </div>
+                    <div class="bg-white p-6 shadow-md border-l-4 border-burgundy text-left rounded-r-lg transform transition-transform hover:-translate-y-1">
+                        <div class="flex items-center gap-3 mb-2">
+                            <h3 class="font-script text-xl text-burgundy">Caramu membuat aku jatuh hatii</h3>
+                        </div>
+                    </div>
+
+                    
+                </div>
+
+                <div class="pt-4">
+                    <button onclick="nextSection('bucket-list')" class="btn-aesthetic">
+                        Next Page
+                    </button>
+                </div>
+            </div>
+        </section>
+
+        <!-- SECTION 6: BUCKET LIST -->
+        <section id="bucket-list" class="section flex-col items-center justify-center min-h-screen p-6 relative">
+            <div class="w-full max-w-sm bg-white p-8 shadow-2xl rounded-sm border border-rose-gold/20 relative rotate-1">
+                <div class="washi-tape" style="top: -12px; transform: translateX(-50%) rotate(1deg);"></div>
+                
+                <h2 class="text-2xl font-serif text-burgundy text-center mb-6 border-b border-dashed border-burgundy/20 pb-4">Wishlist With UUU</h2>
+                
+                <div class="space-y-5 font-hand text-xl text-burgundy/80 pl-2">
+                    <div class="flex items-start gap-3 text-gray-400 opacity-60">
+                        <span class="text-gray-300 mt-1">✓</span>
+                        <span class="leading-tight border-b border-gray-100 pb-1 w-full line-through">Photobox</span>
+                    </div>
+                    
+                    <div class="flex items-start gap-3 text-gray-400 opacity-60">
+                        <span class="text-gray-300 mt-1">✓</span>
+                        <span class="leading-tight border-b border-gray-100 pb-1 w-full line-through">Trend Di Bandung</span>
+                    </div>
+
+                    <div class="flex items-start gap-3 text-gray-400 opacity-60">
+                        <span class="text-gray-300 mt-1">✓</span>
+                        <span class="leading-tight border-b border-gray-100 pb-1 w-full line-through">Movie Date</span>
+                    </div>
+                    
+                    <div class="flex items-start gap-3 text-gray-400 opacity-60">
+                        <span class="text-gray-300 mt-1">✓</span>
+                        <span class="leading-tight border-b border-gray-100 pb-1 w-full line-through">Keliling Garut (walaupun setengah yh)</span>
+                    </div>
+                    
+                    <div class="flex items-start gap-3">
+                        <span class="text-rose-gold mt-1">♥</span>
+                        <span class="leading-tight border-b border-gray-100 pb-1 w-full">Timezone Date</span>
+                    </div>
+
+                    <div class="flex items-start gap-3">
+                        <span class="text-rose-gold mt-1">♥</span>
+                        <span class="leading-tight border-b border-gray-100 pb-1 w-full">Pizzaaaaa</span>
+                    </div>
+                    
+                    <div class="flex items-start gap-3">
+                        <span class="text-rose-gold mt-1">♥</span>
+                        <span class="leading-tight border-b border-gray-100 pb-1 w-full">Kulinerannn</span>
+                    </div>
+                   
+                    <div class="flex items-start gap-3">
+                        <span class="text-rose-gold mt-1">♥</span>
+                        <span class="leading-tight border-b border-gray-100 pb-1 w-full">Mountain Date</span>
+                    </div>
+                   
+                    <div class="flex items-start gap-3">
+                        <span class="text-rose-gold mt-1">♥</span>
+                        <span class="leading-tight border-b border-gray-100 pb-1 w-full">Lukiss Datee</span>
+                    </div>
+
+                    <div class="flex items-start gap-3">
+                        <span class="text-rose-gold mt-1">♥</span>
+                        <span class="leading-tight border-b border-gray-100 pb-1 w-full">Jajan Jajann di CFD</span>
+                    </div>
+                    
+                    <div class="flex items-start gap-3">
+                        <span class="text-rose-gold mt-1">♥</span>
+                        <span class="leading-tight border-b border-gray-100 pb-1 w-full">Rena Datee</span>
+                    </div>
+                    
+                    <div class="flex items-start gap-3">
+                        <span class="text-rose-gold mt-1">♥</span>
+                        <span class="leading-tight border-b border-gray-100 pb-1 w-full">MASII BANYAA LAGII</span>
+                    </div>
+                    
+                </div>
+
+                <div class="mt-10 text-center">
+                    <button onclick="nextSection('invitation-choice')" class="btn-aesthetic">
+                        One Last Thing...
+                    </button>
+                </div>
+             </div>
+        </section>
+
+        <!-- SECTION 7: INVITATION CHOICE (UPDATED - Cards instead of Tickets) -->
+        <section id="invitation-choice" class="section flex-col items-center justify-start min-h-screen pt-20 pb-10 px-4 text-center overflow-y-auto">
+            
+            <div class="mb-8 max-w-xs animate-fade-in">
+                <p class="font-hand text-xl text-burgundy mb-2">"Maaf ya sayang, di Valentine ini aku cuma bisa bikinin web..."</p>
+                <p class="font-sans text-[10px] text-gray-500 uppercase tracking-widest">BUT I WANT TO ASK YOU</p>
+            </div>
+
+            <div class="space-y-6 w-full max-w-xs pb-10">
+                <h2 class="text-3xl font-serif text-burgundy mb-6">Choose Your Date</h2>
+                
+                <div class="grid grid-cols-2 gap-4">
+                    <!-- Option Pizza Card -->
+                    <div onclick="showFinalInvitation('pizza')" class="bg-white p-4 rounded-xl shadow-lg border border-burgundy/10 cursor-pointer hover:scale-105 transition-transform hover:border-burgundy/30 group flex flex-col items-center justify-center h-40">
+                        <div class="w-12 h-12 bg-burgundy/5 rounded-full flex items-center justify-center mb-3 group-hover:bg-burgundy/10 transition-colors">
+                            <span class="text-3xl group-hover:rotate-12 transition-transform">🍕</span>
+                        </div>
+                        <h3 class="font-serif text-burgundy font-bold">Pizza Date</h3>
+                        <p class="text-[9px] text-gray-500 mt-1 uppercase tracking-wide">Makan Kenyang</p>
+                    </div>
+
+                    <!-- Option Movie Card -->
+                    <div onclick="showFinalInvitation('movie')" class="bg-white p-4 rounded-xl shadow-lg border border-burgundy/10 cursor-pointer hover:scale-105 transition-transform hover:border-burgundy/30 group flex flex-col items-center justify-center h-40">
+                        <div class="w-12 h-12 bg-burgundy/5 rounded-full flex items-center justify-center mb-3 group-hover:bg-burgundy/10 transition-colors">
+                            <span class="text-3xl group-hover:rotate-12 transition-transform">🍿</span>
+                        </div>
+                        <h3 class="font-serif text-burgundy font-bold">Movie Date</h3>
+                        <p class="text-[9px] text-gray-500 mt-1 uppercase tracking-wide">Nonton Film</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- SECTION 8: FINAL INVITATION & SUCCESS FLOW (UPDATED - Royal Card Style) -->
+        <section id="final-invitation" class="section flex-col items-center justify-center min-h-screen p-4 text-center hidden">
+            
+            <!-- STEP 1: CONFIRMATION CARD (UPDATED) -->
+            <div id="q-container" class="space-y-6 w-full max-w-xs relative">
+                
+                <!-- Elegant Card Design instead of Stub Ticket -->
+                <div class="royal-card p-8 rotate-1 transform hover:rotate-0 transition-transform duration-500 mx-auto w-full">
+                    <p class="font-mono text-[9px] tracking-[0.3em] uppercase mb-4 text-rose-gold border-b border-rose-gold/20 pb-2">OFFICIAL INVITATION</p>
+                    
+                    <h2 id="invite-title" class="text-3xl font-script mb-4 text-burgundy">Pizza Date?</h2>
+                    
+                    <div class="space-y-3 font-sans text-xs text-burgundy/80 my-6">
+                        <div class="flex justify-between border-b border-dashed border-burgundy/10 pb-1">
+                            <span class="text-gray-400">Where</span>
+                            <span id="invite-loc" class="font-bold">PIZZA HUT 🍕</span>
+                        </div>
+                        <div class="flex justify-between border-b border-dashed border-burgundy/10 pb-1">
+                            <span class="text-gray-400">When</span>
+                            <span class="font-bold">13 FEBRUARY</span>
+                        </div>
+                        <div class="flex justify-between border-b border-dashed border-burgundy/10 pb-1">
+                            <span class="text-gray-400">Dresscode</span>
+                            <span class="font-bold">PRAMUKA</span>
+                        </div>
+                    </div>
+                    
+                    <p class="font-hand text-lg text-gray-500 mt-4">"Can't wait to make beautiful memories with you!!"</p>
+                </div>
+
+                <div class="flex flex-col items-center gap-3 w-full relative h-28 justify-center">
+                    <button id="yesBtn" onclick="handleYes()" class="btn-aesthetic w-full max-w-[180px] shadow-xl z-20 bg-burgundy text-white border-none">Yes, I'd Love To!</button>
+                    <button id="noBtn" onmouseover="moveNoButton()" onclick="moveNoButton()" class="text-[10px] font-sans text-burgundy/40 hover:text-burgundy z-20 transition-colors">No, maybe later</button>
+                </div>
+                
+                <button onclick="backToChoice()" class="text-[9px] text-gray-400 underline mt-4">Ganti Pilihan</button>
+            </div>
+
+            <!-- STEP 2: SUCCESS MSG (UPDATED - Royal Style) & WA BUTTON -->
+            <div id="success-msg" class="hidden flex-col items-center justify-center animate-slide-up absolute inset-0 bg-burgundy/95 z-50 p-6 backdrop-blur-sm overflow-y-auto">
+                
+                <div class="w-full max-w-xs animate-float mt-4 mb-6">
+                    <div class="text-center mb-6">
+                        <p class="text-white/70 font-sans text-[10px] tracking-[0.5em] uppercase animate-pulse-slow">RESERVATION CONFIRMED</p>
+                    </div>
+
+                    <!-- Final Royal Card -->
+                    <div class="royal-card p-6 bg-white text-burgundy">
+                        <div class="text-center mb-6 border-b-2 border-double border-burgundy/10 pb-4">
+                            <p class="font-serif text-lg font-bold uppercase tracking-widest text-rose-gold mb-1">VIP PASS</p>
+                            <h2 id="ticket-type" class="font-script text-3xl text-burgundy">Valentine's Dinner</h2>
+                        </div>
+
+                        <div class="space-y-4 text-left">
+                            <div class="flex justify-between items-center">
+                                <span class="text-[10px] uppercase text-gray-400 tracking-wide">Guest</span>
+                                <span class="font-sans text-sm font-bold">Kiaa ❤️</span>
+                            </div>
+                            <div class="flex justify-between items-center">
+                                <span class="text-[10px] uppercase text-gray-400 tracking-wide">Date</span>
+                                <span class="font-sans text-sm font-bold">13 Feb</span>
+                            </div>
+                            <div class="flex justify-between items-center">
+                                <span class="text-[10px] uppercase text-gray-400 tracking-wide">Location</span>
+                                <span id="ticket-loc" class="font-sans text-sm font-bold">Pizza Hut</span>
+                            </div>
+                             <div class="flex justify-between items-center">
+                                <span class="text-[10px] uppercase text-gray-400 tracking-wide">Code</span>
+                                <span class="font-mono text-xs text-gray-500">LOVE-2026</span>
+                            </div>
+                        </div>
+
+                        <div class="mt-6 pt-4 border-t border-burgundy/10 text-center">
+                            <p class="font-hand text-xl text-burgundy">"It's a date!"</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- WA BUTTON -->
+                <button onclick="shareToWA()" class="bg-[#25D366] text-white px-6 py-3 rounded-full text-xs font-bold tracking-widest hover:bg-[#128C7E] transition-all shadow-lg flex items-center justify-center gap-2 w-full max-w-xs mb-4">
+                    <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24"><path d="M.057 24l1.687-6.163c-1.041-1.804-1.588-3.849-1.587-5.946.003-6.556 5.338-11.891 11.893-11.891 3.181.001 6.167 1.24 8.413 3.488 2.245 2.248 3.481 5.236 3.48 8.414-.003 6.557-5.338 11.892-11.893 11.892-1.99-.001-3.951-.5-5.688-1.448l-6.305 1.654zm6.597-3.807c1.676.995 3.276 1.591 5.392 1.592 5.448 0 9.886-4.434 9.889-9.885.002-5.462-4.415-9.89-9.881-9.892-5.452 0-9.887 4.434-9.889 9.884-.001 2.225.651 3.891 1.746 5.634l-.999 3.648 3.742-.981zm11.387-5.464c-.074-.124-.272-.198-.57-.347-.297-.149-1.758-868-2.031-.967-.272-.099-.47-.149-.669.149-.198.297-.768.967-.941 1.165-.173.198-.347.223-.644.074-.297-.149-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.297-.347.446-.521.151-.172.2-.296.3-.495.099-.198.05-.372-.025-.521-.075-.148-.669-1.611-.916-2.206-.242-.579-.487-.501-.669-.51l-.57-.01c-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.095 3.2 5.076 4.487.709.306 1.263.489 1.694.626.712.226 1.36.194 1.872.118.571-.085 1.758-.719 2.006-1.413.248-.695.248-1.29.173-1.414z"/></svg>
+                    KIRIM UNDANGAN (WA)
+                </button>
+
+                <!-- BUTTON LANJUT KE PHOTO -->
+                <div class="text-center pb-8">
+                     <p class="text-white/40 text-[9px] mb-2">NEXTT NGAPAIN YYAA??</p>
+                     <button onclick="goToPhoto()" class="bg-white/10 border border-white/20 text-white px-6 py-2 rounded-full text-[10px] font-bold tracking-widest hover:bg-white hover:text-burgundy transition-all">
+                        LANJUT KE SESI FOTO 📸
+                    </button>
+                </div>
+
+            </div>
+
+            <!-- STEP 3: PHOTO SESSION -->
+            <div id="photo-section" class="hidden flex-col items-center justify-center absolute inset-0 bg-black/95 z-[60] p-6 text-white text-center">
+                 <div class="max-w-xs w-full space-y-6">
+                    <h2 class="font-serif text-2xl">Sebelum review,<br>kita foto dulu!!</h2>
+                    
+                    <!-- Fake Camera UI -->
+                    <div class="relative bg-gray-800 rounded-2xl overflow-hidden aspect-[3/4] border border-gray-600 flex items-center justify-center">
+                         <p class="text-xs text-gray-400 animate-pulse">Camera is loading...</p>
+                         <div class="absolute bottom-4 inset-x-0 flex justify-center">
+                             <div class="w-12 h-12 rounded-full border-4 border-white flex items-center justify-center cursor-pointer active:scale-95 transition-transform" onclick="takePhoto()">
+                                 <div class="w-10 h-10 bg-white rounded-full"></div>
+                             </div>
+                         </div>
+                         <!-- Framing lines -->
+                         <div class="absolute top-4 right-4 w-4 h-4 border-t-2 border-r-2 border-white/50"></div>
+                         <div class="absolute top-4 left-4 w-4 h-4 border-t-2 border-l-2 border-white/50"></div>
+                         <div class="absolute bottom-4 right-4 w-4 h-4 border-b-2 border-r-2 border-white/50"></div>
+                         <div class="absolute bottom-4 left-4 w-4 h-4 border-b-2 border-l-2 border-white/50"></div>
+                    </div>
+
+                    <p class="font-hand text-lg text-gray-300">"Cis Kacang Buncisss.. :)"</p>
+                 </div>
+            </div>
+
+            <!-- STEP 4: REVIEW INTERACTIVE -->
+            <div id="review-final" class="hidden flex-col items-center justify-center absolute inset-0 bg-burgundy/95 z-[70] p-6 backdrop-blur-md">
+                 <div class="max-w-xs w-full text-center animate-fade-in">
+                    
+                    <div class="mb-6">
+                        <div class="w-24 h-24 bg-white/10 rounded-full mx-auto flex items-center justify-center mb-4 text-4xl">
+                            🥰
+                        </div>
+                        <h2 class="font-serif text-2xl text-white mb-2">Yeay!</h2>
+                        <p class="font-sans text-xs text-white/70">Foto berhasil disimpan (in my hearttt).</p>
+                    </div>
+
+                    <!-- DATE REVIEW CARD -->
+                    <div class="bg-white/10 backdrop-blur-md rounded-xl p-6 border border-white/20 text-center text-white mb-8 shadow-xl">
+                        <p class="font-sans text-[10px] tracking-widest uppercase mb-3 text-rose-gold">RATE OUR DATE</p>
+                        
+                        <!-- Interactive Stars -->
+                        <div class="flex justify-center gap-2 mb-4 star-rating" id="star-container">
+                            <span onclick="rateStar(1)">★</span>
+                            <span onclick="rateStar(2)">★</span>
+                            <span onclick="rateStar(3)">★</span>
+                            <span onclick="rateStar(4)">★</span>
+                            <span onclick="rateStar(5)">★</span>
+                        </div>
+                        
+                        <p id="review-text" class="font-hand text-xl italic min-h-[30px]">Tap bintangnya...</p>
+                    </div>
+                    
+                    <button onclick="location.reload()" class="text-white/50 text-[10px] underline">
+                        Ulangi dari awal
+                    </button>
+                 </div>
+            </div>
+
+        </section>
+
+    </main>
+
+    <!-- LIGHTBOX MODAL -->
+    <div id="lightbox" class="fixed inset-0 z-[60] hidden bg-burgundy/95 backdrop-blur-sm flex items-center justify-center opacity-0 transition-opacity duration-300 p-4">
+        <button onclick="closeLightbox()" class="absolute top-4 right-4 text-white/50 hover:text-white z-[70] p-2 text-xl">✕</button>
+        <div class="relative w-10/12 max-w-sm flex flex-col items-center">
+            <div class="bg-white p-2 pb-8 shadow-2xl transform rotate-1 transition-transform duration-300 border border-gray-100 w-full rounded-sm">
+                <img id="lightbox-img" src="" class="w-full aspect-[4/5] object-cover filter sepia-[0.1]">
+                <div class="mt-4 text-center px-2">
+                    <h3 id="lightbox-caption" class="font-hand text-3xl text-burgundy mb-1 leading-none"></h3>
+                    <p id="lightbox-date" class="text-gray-400 font-sans text-[9px] tracking-widest uppercase"></p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // --- FALLING PETALS ANIMATION ---
+        function createPetals() {
+            const container = document.getElementById('petals-container');
+            const petalCount = 12;
+            for(let i=0; i<petalCount; i++) {
+                const petal = document.createElement('div');
+                petal.classList.add('petal');
+                petal.style.left = Math.random() * 100 + 'vw';
+                petal.style.width = Math.random() * 8 + 8 + 'px';
+                petal.style.height = petal.style.width;
+                petal.style.animationDuration = Math.random() * 5 + 5 + 's';
+                petal.style.animationDelay = Math.random() * 5 + 's';
+                container.appendChild(petal);
+            }
+        }
+        createPetals();
+
+        // Data Foto
+        const moments = [
+            { src: "img/favfoto.jpg", caption: "Foto Favorit Akuu", date: "Minggu 07.12.2025", rotate: "-2deg" },
+            { src: "img/Lucuu.jpg", caption: "Foto Fav Jugaa", date: "Minggu 07.12.2025", rotate: "1deg" },
+            { src: "img/firstfotbar.jpg", caption: "Fotbar Pertama Kitaa", date: "Minggu 25.05.2025", rotate: "-2deg" },
+            { src: "img/firstdate.jpg", caption: "First Time Kita Mainn", date: "Rabu 10.09.2025", rotate: "1deg" },
+            { src: "img/gorjes.jpg", caption: "Cantikk", date: "Senin 15.12.2025", rotate: "-2deg" },
+            { src: "img/keychain.jpg", caption: "Kita Bikin Keychainn", date: "Minggu 07.12.2025", rotate: "1deg" },
+            { src: "img/gulpaddate.jpg", caption: "Gulpad Date", date: "Rabu 24.09.2025", rotate: "-2deg" },
+            { src: "img/kemerdekaan.jpg", caption: "Fotbar After H Pahlawan", date: "Senin 10.11.2025", rotate: "1deg" },
+            { src: "img/afterldks.jpg", caption: "Fotbar After LDKS", date: "Sabtu 13.12.2025", rotate: "-2deg" },
+            { src: "img/afterdemos.jpg", caption: "Fotbar After Demos", date: "Kamis 17.07.2025", rotate: "1deg" },
+        ];
+
+        // Gallery Generation
+        const container = document.getElementById('scrapbook-container');
+        moments.forEach((m, index) => {
+            const div = document.createElement('div');
+            div.className = "relative group"; 
+            div.innerHTML = `
+                <div class="washi-tape" style="width: 60px; height: 18px; top: -8px;"></div>
+                <div class="polaroid-frame" style="transform: rotate(${m.rotate})" onclick="openLightbox(${index})">
+                    <img src="${m.src}" class="w-full aspect-[4/5] object-cover mb-2 filter sepia-[0.1]">
+                    <p class="font-hand text-lg md:text-xl text-center text-burgundy leading-none truncate px-1">${m.caption}</p>
+                    <p class="text-[7px] text-gray-400 text-center uppercase tracking-widest mt-1">${m.date}</p>
+                </div>
+            `;
+            container.appendChild(div);
+        });
+
+        // Lightbox Logic
+        let currentIdx = 0;
+        const lightbox = document.getElementById('lightbox');
+        function openLightbox(index) {
+            currentIdx = index;
+            document.getElementById('lightbox-img').src = moments[index].src;
+            document.getElementById('lightbox-caption').innerText = moments[index].caption;
+            document.getElementById('lightbox-date').innerText = moments[index].date;
+            lightbox.classList.remove('hidden');
+            setTimeout(() => lightbox.classList.remove('opacity-0'), 10);
+        }
+        function closeLightbox() {
+            lightbox.classList.add('opacity-0');
+            setTimeout(() => lightbox.classList.add('hidden'), 300);
+        }
+
+        // Navigation
+        function nextSection(id) {
+            const active = document.querySelector('.section.active');
+            active.style.opacity = '0';
+            setTimeout(() => {
+                active.classList.remove('active');
+                const next = document.getElementById(id);
+                if (next) {
+                    next.classList.add('active');
+                    void next.offsetWidth; 
+                    next.style.opacity = '1';
+                    if (id === 'letter') startLetter();
+                }
+            }, 800);
+        }
+
+        // Letter Typing Effect
+        function startLetter() {
+            const text = "kiaaa thank you for coming into my life. u r actually making me smile n laugh, thank uuu for ur understandingg, thank uuu for being my biggest supporter, n thank uuu for carring about me rn. i really appreciate uuu so much n uuu will always have a special place in my heart, i love you a lottt.";
+            const target = document.getElementById('typewriter');
+            let i = 0;
+            target.innerHTML = "";
+            
+            function type() {
+                if (i < text.length) {
+                    target.innerHTML += text.charAt(i);
+                    i++;
+                    setTimeout(type, 50);
+                }
+            }
+            type();
+        }
+
+        // INVITATION CHOICE LOGIC
+        let selectedDateType = '';
+
+        function showFinalInvitation(type) {
+            selectedDateType = type;
+            
+            // Hide choice section
+            const choiceSection = document.getElementById('invitation-choice');
+            choiceSection.style.opacity = '0';
+            setTimeout(() => {
+                choiceSection.classList.remove('active');
+                
+                // Update Ticket Content
+                const title = document.getElementById('invite-title');
+                const loc = document.getElementById('invite-loc');
+                
+                if (type === 'pizza') {
+                    title.innerText = "Pizza Date?";
+                    loc.innerHTML = "PIZZA HUT 🍕";
+                } else {
+                    title.innerText = "Movie Date?";
+                    loc.innerHTML = "XXI / CGV 🍿";
+                }
+
+                // Show Final Invitation Section
+                const finalSection = document.getElementById('final-invitation');
+                finalSection.classList.add('active');
+                void finalSection.offsetWidth;
+                finalSection.style.opacity = '1';
+            }, 800);
+        }
+
+        function backToChoice() {
+            const finalSection = document.getElementById('final-invitation');
+            finalSection.style.opacity = '0';
+            setTimeout(() => {
+                finalSection.classList.remove('active');
+                
+                // Reset states
+                document.getElementById('success-msg').style.display = 'none'; 
+                document.getElementById('photo-section').style.display = 'none'; 
+                document.getElementById('review-final').style.display = 'none'; 
+                document.getElementById('q-container').style.display = 'block'; // Show question again
+
+                const choiceSection = document.getElementById('invitation-choice');
+                choiceSection.classList.add('active');
+                void choiceSection.offsetWidth;
+                choiceSection.style.opacity = '1';
+            }, 800);
+        }
+
+        // Button Logic (Yes/No)
+        let attempts = 0;
+        function moveNoButton() {
+            const btn = document.getElementById('noBtn');
+            const yesBtn = document.getElementById('yesBtn');
+            attempts++;
+            if (attempts < 6) yesBtn.style.transform = `scale(${1 + attempts * 0.1})`;
+            
+            const maxMove = 80; 
+            const x = (Math.random() - 0.5) * maxMove;
+            const y = (Math.random() - 0.5) * maxMove;
+            btn.style.transform = `translate(${x}px, ${y}px)`;
+            
+            const texts = ["Yakin?", "Serius gamau?", "Please?", "Ayolahh", "Tombolnya rusak"];
+            if (attempts <= texts.length) btn.innerText = texts[attempts - 1];
+            else btn.style.opacity = "0";
+        }
+
+        function handleYes() {
+            document.getElementById('q-container').style.display = 'none';
+            const successMsg = document.getElementById('success-msg');
+            successMsg.style.display = 'flex';
+            
+            // Populate Ticket
+            const ticketType = document.getElementById('ticket-type');
+            const ticketLoc = document.getElementById('ticket-loc');
+            
+            if (selectedDateType === 'pizza') {
+                ticketType.innerText = "Pizza Date";
+                ticketLoc.innerText = "Pizza Hut";
+            } else {
+                ticketType.innerText = "Movie Date";
+                ticketLoc.innerText = "Cinema";
+            }
+
+            const colors = ['#D4AF37', '#FFF', '#8B1C26'];
+            confetti({ particleCount: 200, spread: 120, origin: { y: 0.6 }, colors: colors, scalar: 1.2 });
+        }
+
+        // STEP: Go to Photo
+        function goToPhoto() {
+            const successMsg = document.getElementById('success-msg');
+            successMsg.style.display = 'none';
+            const photoSec = document.getElementById('photo-section');
+            photoSec.style.display = 'flex';
+        }
+
+        // STEP: Take Photo & Show Review
+        function takePhoto() {
+            // Flash Effect
+            const flash = document.getElementById('camera-flash');
+            flash.classList.add('animate-flash');
+            
+            setTimeout(() => {
+                flash.classList.remove('animate-flash');
+                document.getElementById('photo-section').style.display = 'none';
+                
+                // Show Review
+                const reviewSec = document.getElementById('review-final');
+                reviewSec.style.display = 'flex';
+                
+            }, 400);
+        }
+
+        // INTERACTIVE RATING
+        function rateStar(rating) {
+            const stars = document.querySelectorAll('#star-container span');
+            const reviewText = document.getElementById('review-text');
+            
+            stars.forEach((star, index) => {
+                if (index < rating) {
+                    star.classList.add('active');
+                } else {
+                    star.classList.remove('active');
+                }
+            });
+
+            if (rating >= 4) {
+                reviewText.innerText = '"Seru banget! 100/100 pokoknya."';
+            } else if (rating === 3) {
+                reviewText.innerText = '"Lumayan seru, asal sama kamu."';
+            } else {
+                reviewText.innerText = '"Hmm, yang penting bareng kamu deh."';
+            }
+        }
+
+        function shareToWA() {
+            // GANTI NOMOR WHATSAPP DI SINI (Gunakan format 62...)
+            const phoneNumber = "628xxxxxxxxxx"; 
+            
+            let message = "";
+            if (selectedDateType === 'pizza') {
+                message = "HAIII! Letssgoww pizza datee";
+            } else {
+                message = "HAIII! Letssgoww movie datee";
+            }
+            
+            const url = `https://wa.me/${6285320002950}?text=${encodeURIComponent(message)}`;
+            window.open(url, '_blank');
+        }
+    </script>
+</body>
+</html>
